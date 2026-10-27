@@ -5,9 +5,17 @@ Prometheus metrics (/metrics), and static frontend serving.
 """
 
 import os
+import sys
 import asyncio
 from contextlib import asynccontextmanager
 from typing import Dict, List, Any, Optional
+
+# Use SelectorEventLoop on Windows to prevent WinError 10054 on client disconnect
+if sys.platform == "win32":
+    try:
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    except Exception:
+        pass
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Body, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -168,7 +176,7 @@ async def websocket_traffic_stream(websocket: WebSocket):
 
             await websocket.send_json(snapshot)
             await asyncio.sleep(1.0)
-    except (WebSocketDisconnect, asyncio.CancelledError):
+    except (WebSocketDisconnect, asyncio.CancelledError, ConnectionResetError, OSError):
         pass
     except Exception:
         pass
