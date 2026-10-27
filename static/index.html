@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetPulse: Real-Time Network Traffic Analysis System</title>
+  <meta name="description" content="High-performance real-time network traffic analysis, packet dissection, statistical baseline anomaly detection, and ethical network auditing.">
+  <link rel="stylesheet" href="/static/style.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- CRT Scanline Effect Overlay -->
+  <div class="scanline-overlay" id="scanlineOverlay"></div>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-brand" onclick="navigateTo('overview')">
+      <div class="nav-logo-icon">NP</div>
+      <div class="nav-title">NET<span>PULSE</span></div>
+    </div>
+    
+    <div class="nav-links-wrapper">
+      <ul class="nav-links">
+        <li><a class="nav-link active" onclick="navigateTo('overview')"><span class="nav-idx">01</span><span class="nav-txt">Overview</span></a></li>
+        <li><a class="nav-link" onclick="navigateTo('dashboard')"><span class="nav-idx">02</span><span class="nav-txt">Dashboard</span></a></li>
+        <li><a class="nav-link" onclick="navigateTo('alerts')"><span class="nav-idx">03</span><span class="nav-txt">Alerts</span></a></li>
+        <li><a class="nav-link" onclick="navigateTo('audit')"><span class="nav-idx">04</span><span class="nav-txt">Audit</span></a></li>
+        <li><a class="nav-link" onclick="navigateTo('toolkit')"><span class="nav-idx">05</span><span class="nav-txt">Toolkit</span></a></li>
+        <li><a class="nav-link" onclick="navigateTo('learn')"><span class="nav-idx">06</span><span class="nav-txt">Learn</span></a></li>
+        <li><a class="nav-link" onclick="navigateTo('arch')"><span class="nav-idx">07</span><span class="nav-txt">Architecture</span></a></li>
+      </ul>
+    </div>
+
+    <div class="nav-actions">
+      <button class="btn btn-sm btn-cyan" onclick="toggleScanlines()" id="scanlineBtn">CRT SCAN [ON]</button>
+      <div class="nav-system-status">
+        <span class="status-led" id="systemLed"></span>
+        <span id="systemStatusText">ONLINE</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- ======================================================================
+         SECTION 1: OVERVIEW & TOPOLOGY HERO
+         ====================================================================== -->
+    <section id="section-overview" class="section active">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <div style="font-size: 0.8rem; color: var(--neon-cyan); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.5rem;">
+            Computer Networks Final Project // Advanced Network Telemetry
+          </div>
+          <h1>NetPulse: Real-Time Network Traffic Analysis System<span class="blinking-cursor"></span></h1>
+          <div class="hero-abstract">
+            <strong>Project Abstract:</strong> Modern computer networks generate a continuous and increasing volume of traffic, making it difficult for administrators to monitor communication, identify abnormal activities, and respond to network issues in real time. This project implements a Real-Time Network Traffic Analysis System that captures, analyzes, and visualizes traffic as it occurs, showing source/destination addresses, protocols, packet counts, bandwidth utilization, and traffic patterns, and highlighting significant deviations from established baselines.
+          </div>
+          <div class="tags-container">
+            <span class="tag-badge">Real-Time Network Traffic Analysis</span>
+            <span class="tag-badge">Network Monitoring</span>
+            <span class="tag-badge">Packet Capture</span>
+            <span class="tag-badge">Network Security</span>
+            <span class="tag-badge">Traffic Visualization</span>
+            <span class="tag-badge">Bandwidth Monitoring</span>
+            <span class="tag-badge">Anomaly Detection</span>
+            <span class="tag-badge">Network Management</span>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 1rem;">
+            <button class="btn btn-primary" onclick="navigateTo('dashboard')">⚡ LAUNCH LIVE CONSOLE</button>
+            <button class="btn btn-cyan" onclick="navigateTo('audit')">🔍 AUDIT PORT SCANNER</button>
+          </div>
+        </div>
+
+        <div class="canvas-container">
+          <div class="canvas-overlay-tag">LIVE TOPOLOGY SIMULATION // REAL-TIME NODES</div>
+          <canvas id="topologyCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Core System Objectives</h2>
+          <div class="section-subtitle">Architectural pillars of the NetPulse traffic analysis engine</div>
+        </div>
+      </div>
+
+      <div class="objectives-grid">
+        <div class="objective-item">
+          <div class="objective-num">01</div>
+          <h3 style="font-size: 1rem; color: var(--neon-cyan); margin-bottom: 0.5rem;">Layer 2-7 Deep Packet Dissection</h3>
+          <p style="font-size: 0.85rem; color: var(--text-main);">
+            Captures raw frames from network adapters via Scapy or realistic synthetic stream, decomposing Ethernet, ARP, IPv4/IPv6, TCP flags (SYN/ACK/FIN/RST), UDP datagrams, ICMP echo, and DNS queries with header inspection.
+          </p>
+        </div>
+
+        <div class="objective-item">
+          <div class="objective-num">02</div>
+          <h3 style="font-size: 1rem; color: var(--neon-green); margin-bottom: 0.5rem;">Non-Blocking Real-Time Streaming</h3>
+          <p style="font-size: 0.85rem; color: var(--text-main);">
+            Dual-threaded pipeline isolating capture from presentation. In-memory circular deques (O(1)) push 1 Hz JSON telemetry frames over WebSockets for live 60-second bandwidth timelines and protocol distribution charts.
+          </p>
+        </div>
+
+        <div class="objective-item">
+          <div class="objective-num">03</div>
+          <h3 style="font-size: 1rem; color: var(--neon-amber); margin-bottom: 0.5rem;">Heuristic & Statistical Anomaly Engine</h3>
+          <p style="font-size: 0.85rem; color: var(--text-main);">
+            Computes rolling mean and standard deviation to detect deviations with Z-score &gt; 3.0. Integrates rule-based IDS heuristics for port scanning, TCP SYN floods, ICMP echo floods, and DNS query spikes with SQLite persistence.
+          </p>
+        </div>
+
+        <div class="objective-item">
+          <div class="objective-num">04</div>
+          <h3 style="font-size: 1rem; color: var(--neon-purple); margin-bottom: 0.5rem;">Ethical Network Audit Module</h3>
+          <p style="font-size: 0.85rem; color: var(--text-main);">
+            Integrated multithreaded TCP/UDP port scanner inspired by the open-source SharkTooth tool with strict RFC1918 private/loopback safety bounds, latency metrics, and Prometheus monitoring.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ======================================================================
+         SECTION 2: LIVE DASHBOARD
+         ====================================================================== -->
+    <section id="section-dashboard" class="section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title"><span class="text-green">⚡</span> Real-Time Traffic Console</h2>
+          <div class="section-subtitle">Live packet telemetry, bandwidth monitoring, protocol classification, and ring buffer</div>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--neon-cyan);">
+          WS FEED: <span id="wsStatusText" class="text-green">CONNECTING...</span>
+        </div>
+      </div>
+
+      <!-- Controls & Attack Simulator Bar -->
+      <div class="dashboard-controls">
+        <div class="control-group">
+          <label style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Interface:</label>
+          <select id="ifaceSelect" class="form-control" style="width: 280px;"></select>
+          <button id="startBtn" class="btn btn-primary" onclick="startCapture()">▶ START CAPTURE</button>
+          <button id="stopBtn" class="btn btn-danger" onclick="stopCapture()">⏹ STOP</button>
+          <span id="modeBadge" class="tag-badge">MODE: DEMO</span>
+        </div>
+
+        <div class="attack-sim-box">
+          <span style="font-size: 0.75rem; color: var(--neon-amber); font-weight: 700; text-transform: uppercase;">⚡ Attack Simulator:</span>
+          <button class="btn btn-sm btn-amber" onclick="injectAttack('port_scan')">Port Scan</button>
+          <button class="btn btn-sm btn-danger" onclick="injectAttack('syn_flood')">SYN Flood</button>
+          <button class="btn btn-sm btn-amber" onclick="injectAttack('icmp_flood')">ICMP Flood</button>
+          <button class="btn btn-sm btn-cyan" onclick="injectAttack('dns_spike')">DNS Spike</button>
+        </div>
+      </div>
+
+      <!-- Live Error / Fallback Notification Banner -->
+      <div id="captureAlertBanner" style="display: none; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--neon-cyan); padding: 10px 14px; border-radius: 4px; margin-bottom: 1.25rem; font-size: 0.85rem;">
+        <span id="captureAlertMsg"></span>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card green">
+          <div class="kpi-label">Total Packets</div>
+          <div class="kpi-value" id="kpiTotalPackets">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Packets / Sec</div>
+          <div class="kpi-value" id="kpiPps">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Bandwidth (KB/s)</div>
+          <div class="kpi-value" id="kpiBandwidth">0.0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Volume Processed</div>
+          <div class="kpi-value" id="kpiTotalBytes">0 KB</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Active Connections</div>
+          <div class="kpi-value" id="kpiActiveConns">0</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-label">Alerts Triggered</div>
+          <div class="kpi-value" id="kpiAlerts">0</div>
+        </div>
+      </div>
+
+      <!-- Main Visualizations Grid -->
+      <div class="charts-grid-main">
+        <div class="cyber-card">
+          <div class="cyber-card-title">
+            <span>Bandwidth Timeline (Last 60 Seconds)</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">1 Hz Sampling</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="timelineChart"></canvas>
+          </div>
+        </div>
+
+        <div class="cyber-card">
+          <div class="cyber-card-title">
+            <span>Protocol Distribution</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">L2-L7 Share</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="protocolChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub Visualizations Grid -->
+      <div class="charts-grid-sub">
+        <div class="cyber-card">
+          <div class="cyber-card-title">
+            <span>Top 10 Talkers (Source IPs by Volume)</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Kilobytes Transferred</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="talkersChart"></canvas>
+          </div>
+        </div>
+
+        <div class="cyber-card">
+          <div class="cyber-card-title">
+            <span>Top Destination Ports & Services</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Hit Frequency</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="portsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Packet Dissection Ring Buffer -->
+      <div class="cyber-card">
+        <div class="cyber-card-title">
+          <span>Live Packet Buffer (Last 50 Packets // Click row to inspect headers)</span>
+          <span style="font-size: 0.75rem; color: var(--neon-green);" id="bufferCountText">50 Frames</span>
+        </div>
+
+        <!-- Filter Box -->
+        <div class="table-filter-bar">
+          <input type="text" id="packetFilterInput" class="form-control" placeholder="Search IP, Port, Flag, or Protocol..." oninput="filterPacketTable()" style="max-width: 380px;">
+          <select id="packetProtoFilter" class="form-control" onchange="filterPacketTable()" style="max-width: 160px;">
+            <option value="">All Protocols</option>
+            <option value="TCP">TCP</option>
+            <option value="UDP">UDP</option>
+            <option value="ICMP">ICMP</option>
+            <option value="DNS">DNS</option>
+            <option value="HTTP">HTTP</option>
+            <option value="HTTPS">HTTPS</option>
+            <option value="ARP">ARP</option>
+          </select>
+          <button class="btn btn-sm btn-cyan" onclick="resetPacketFilter()">Clear Filter</button>
+        </div>
+
+        <div class="packet-table-container">
+          <table class="cyber-table" id="packetTable">
+            <thead>
+              <tr>
+                <th style="width: 50px;">#</th>
+                <th style="width: 100px;">Time</th>
+                <th style="width: 150px;">Source IP</th>
+                <th style="width: 150px;">Destination IP</th>
+                <th style="width: 90px;">Protocol</th>
+                <th style="width: 110px;">Port / Service</th>
+                <th style="width: 70px;">Length</th>
+                <th style="width: 110px;">TCP Flags</th>
+                <th>Frame Summary</th>
+              </tr>
+            </thead>
+            <tbody id="packetTableBody">
+              <!-- Populated dynamically via WebSocket -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ======================================================================
+         SECTION 3: ANOMALY DETECTION & ALERTS
+         ====================================================================== -->
+    <section id="section-alerts" class="section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title"><span class="text-amber">⚠</span> Anomaly Detection & Incident Engine</h2>
+          <div class="section-subtitle">Z-Score statistical baseline monitor, rule-based signature detection, and SQLite audit log</div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <a href="/api/alerts/export" class="btn btn-sm btn-green" download>⬇ EXPORT CSV</a>
+          <button class="btn btn-sm btn-danger" onclick="clearAlerts()">🗑 CLEAR DB</button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <!-- Statistical Baseline Status -->
+        <div class="cyber-card">
+          <div class="cyber-card-title">Statistical Z-Score Baseline Engine</div>
+          <p style="font-size: 0.85rem; color: var(--text-main); margin-bottom: 0.75rem;">
+            Maintains rolling window of packet and bandwidth rates. Flags anomalies when $|Z| &gt; 3.0$ (less than 0.3% probability under normal distribution).
+          </p>
+          <div class="z-score-indicator">
+            <span style="font-size: 1.2rem; font-family: var(--font-heading); color: var(--neon-green);" id="zScoreVal">Z = 0.42</span>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              Current Z-score baseline status: <span id="zScoreStatus" class="text-green">NORMAL TRAFFIC (No deviation)</span>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.8;">
+            • Formula: $Z = \frac{X - \mu}{\sigma}$ (Current Rate minus Rolling Mean divided by Standard Deviation)<br>
+            • Confidence Interval: 99.7% Gaussian bounds<br>
+            • Anomaly Condition: Sustained burst &gt; 3.0 sigma
+          </div>
+        </div>
+
+        <!-- Active Heuristic Rules -->
+        <div class="cyber-card">
+          <div class="cyber-card-title">Active Rule-Based IDS Signatures</div>
+          <div style="font-size: 0.85rem; line-height: 1.8;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 4px 0;">
+              <span class="text-cyan">Reconnaissance Port Scan</span>
+              <span style="color: var(--neon-amber); font-weight: 700;">&gt; 15 ports / 5s</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 4px 0;">
+              <span class="text-cyan">TCP SYN Flood Attack</span>
+              <span style="color: var(--neon-red); font-weight: 700;">&gt; 25 SYN w/o ACK</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 4px 0;">
+              <span class="text-cyan">ICMP Echo Request Flood</span>
+              <span style="color: var(--neon-amber); font-weight: 700;">&gt; 30 echo / 2s</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 4px 0;">
+              <span class="text-cyan">DNS Tunneling / Query Spike</span>
+              <span style="color: var(--neon-purple); font-weight: 700;">&gt; 40 queries / 3s</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+              <span class="text-cyan">Jumbo MTU Oversize Frame</span>
+              <span style="color: var(--neon-cyan); font-weight: 700;">&gt; 1514 bytes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerts Feed -->
+      <div class="cyber-card">
+        <div class="cyber-card-title">
+          <span>Security Alert Feed & SQLite Audit Log</span>
+          <div style="display: flex; gap: 8px;">
+            <select id="alertSeverityFilter" class="form-control" onchange="loadAlertsList()" style="width: 140px; font-size: 0.75rem;">
+              <option value="">All Severities</option>
+              <option value="HIGH">High Only</option>
+              <option value="MEDIUM">Medium Only</option>
+              <option value="LOW">Low Only</option>
+            </select>
+            <button class="btn btn-sm btn-cyan" onclick="loadAlertsList()">Refresh</button>
+          </div>
+        </div>
+
+        <div class="packet-table-container" style="max-height: 440px;">
+          <table class="cyber-table">
+            <thead>
+              <tr>
+                <th style="width: 60px;">ID</th>
+                <th style="width: 150px;">Timestamp</th>
+                <th style="width: 90px;">Severity</th>
+                <th style="width: 180px;">Incident Type</th>
+                <th style="width: 140px;">Source Host</th>
+                <th style="width: 140px;">Target Host</th>
+                <th>Diagnostic Explanation</th>
+                <th style="width: 70px;">Score</th>
+              </tr>
+            </thead>
+            <tbody id="alertsTableBody">
+              <!-- Dynamically populated from SQLite -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ======================================================================
+         SECTION 4: NETWORK AUDIT (SHARKTOOTH MODULE)
+         ====================================================================== -->
+    <section id="section-audit" class="section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title"><span class="text-cyan">🛡</span> Network Audit (SharkTooth Module)</h2>
+          <div class="section-subtitle">
+            Multithreaded TCP/UDP port scanner inspired by SharkTooth with RFC1918 safety guards and Prometheus metrics
+          </div>
+        </div>
+        <a href="https://github.com/znakar/SharkTooth" target="_blank" class="tag-badge" style="text-decoration: none;">
+          GitHub: znakar/SharkTooth ↗
+        </a>
+      </div>
+
+      <!-- Legal and Safety Disclaimer Banner -->
+      <div class="disclaimer-banner">
+        <strong>LEGAL & ETHICAL COMPLIANCE GUARD:</strong> Unauthorized port scanning against external computers or public networks is illegal under cyber security laws (e.g. CFAA, IT Act). For academic safety, NetPulse strictly restricts all audits to local loopback (<code>127.0.0.0/8</code>, <code>localhost</code>) and private RFC1918 network ranges (<code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code>). Scans against public internet domains or IPs will be rejected.
+      </div>
+
+      <div style="display: grid; grid-template-columns: 360px 1fr; gap: 1.5rem;">
+        <!-- Scanner Form -->
+        <div class="cyber-card">
+          <div class="cyber-card-title">Audit Configuration</div>
+
+          <div style="margin-bottom: 1rem;">
+            <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Target Host / IP:</label>
+            <input type="text" id="scanTargetInput" class="form-control" value="127.0.0.1" placeholder="e.g. 127.0.0.1 or 192.168.1.1">
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Port Specification:</label>
+            <input type="text" id="scanPortsInput" class="form-control" value="common" placeholder="e.g. common, 80,443,22, or 1-100">
+            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">Presets: 'common' (top 27 ports) or custom range</div>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Protocol:</label>
+            <select id="scanProtocolSelect" class="form-control">
+              <option value="TCP">TCP (Connect Handshake)</option>
+              <option value="UDP">UDP (Datagram Probe)</option>
+            </select>
+          </div>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="scanAuthCheckbox">
+            <span>I confirm that I own or am authorized to scan this target.</span>
+          </label>
+
+          <button id="runScanBtn" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 0.5rem;" onclick="executeScan()">
+            ▶ EXECUTE AUDIT
+          </button>
+
+          <div id="scanStatusMsg" style="margin-top: 0.75rem; font-size: 0.8rem;"></div>
+        </div>
+
+        <!-- Scanner Results -->
+        <div class="cyber-card">
+          <div class="cyber-card-title">
+            <span>Audit Findings</span>
+            <span id="scanSummaryBadge" class="tag-badge">READY</span>
+          </div>
+
+          <div class="packet-table-container" style="max-height: 400px;">
+            <table class="cyber-table">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Port</th>
+                  <th style="width: 90px;">Protocol</th>
+                  <th style="width: 100px;">State</th>
+                  <th style="width: 160px;">Service Name</th>
+                  <th>Latency (ms)</th>
+                </tr>
+              </thead>
+              <tbody id="scanResultsBody">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    Configure target and click "Execute Audit" to begin multithreaded socket scan.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ======================================================================
+         SECTION 5: NETWORK TOOLKIT
+         ====================================================================== -->
+    <section id="section-toolkit" class="section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title"><span class="text-green">🛠</span> Network Engineering Toolkit</h2>
+          <div class="section-subtitle">Client-side & backend utilities: Subnet Calculator, VLSM Planner, IP Converter, Ping, DNS, Traceroute</div>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchToolTab('subnet')">Subnet Calculator</button>
+        <button class="tab-btn" onclick="switchToolTab('vlsm')">VLSM Planner</button>
+        <button class="tab-btn" onclick="switchToolTab('converter')">IP / Binary / Hex Converter</button>
+        <button class="tab-btn" onclick="switchToolTab('ping')">Ping Diagnostics</button>
+        <button class="tab-btn" onclick="switchToolTab('dns')">DNS Resolver</button>
+        <button class="tab-btn" onclick="switchToolTab('trace')">Traceroute</button>
+      </div>
+
+      <!-- TAB 1: Subnet Calculator -->
+      <div id="tool-subnet" class="tool-pane active">
+        <div class="calc-grid">
+          <div class="cyber-card">
+            <div class="cyber-card-title">IPv4 Subnet Parameters</div>
+            <div style="margin-bottom: 1rem;">
+              <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">IP Address with Prefix or Mask:</label>
+              <input type="text" id="subnetInput" class="form-control" value="192.168.1.50/24" placeholder="e.g. 192.168.1.50/24 or 10.0.0.1 255.255.0.0">
+            </div>
+            <button class="btn btn-primary" onclick="calculateSubnetTool()">Calculate Subnet</button>
+          </div>
+
+          <div class="cyber-card">
+            <div class="cyber-card-title">Subnet Breakdown</div>
+            <div class="result-box" id="subnetResultBox">
+              <div style="color: var(--text-muted); text-align: center;">Enter network and click Calculate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: VLSM Planner -->
+      <div id="tool-vlsm" class="tool-pane">
+        <div class="calc-grid">
+          <div class="cyber-card">
+            <div class="cyber-card-title">VLSM Allocation Inputs</div>
+            <div style="margin-bottom: 1rem;">
+              <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Major Network Block:</label>
+              <input type="text" id="vlsmMajorNet" class="form-control" value="192.168.1.0/24">
+            </div>
+            <div style="margin-bottom: 0.5rem; font-size: 0.8rem; color: var(--neon-cyan);">Subnet Requirements:</div>
+            <div id="vlsmSubnetsContainer">
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <input type="text" class="form-control vlsm-name" value="Engineering Dept" placeholder="Name">
+                <input type="number" class="form-control vlsm-hosts" value="50" placeholder="Hosts" style="width: 100px;">
+              </div>
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <input type="text" class="form-control vlsm-name" value="Sales & Marketing" placeholder="Name">
+                <input type="number" class="form-control vlsm-hosts" value="25" placeholder="Hosts" style="width: 100px;">
+              </div>
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <input type="text" class="form-control vlsm-name" value="Server Farm" placeholder="Name">
+                <input type="number" class="form-control vlsm-hosts" value="12" placeholder="Hosts" style="width: 100px;">
+              </div>
+              <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                <input type="text" class="form-control vlsm-name" value="WAN Point-to-Point" placeholder="Name">
+                <input type="number" class="form-control vlsm-hosts" value="2" placeholder="Hosts" style="width: 100px;">
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 1rem;">
+              <button class="btn btn-sm btn-cyan" onclick="addVlsmRow()">+ Add Row</button>
+              <button class="btn btn-primary" onclick="calculateVlsmTool()">Compute VLSM</button>
+            </div>
+          </div>
+
+          <div class="cyber-card">
+            <div class="cyber-card-title">Optimal Subnet Partitions</div>
+            <div class="packet-table-container" style="max-height: 340px;">
+              <table class="cyber-table">
+                <thead>
+                  <tr>
+                    <th>Subnet</th>
+                    <th>Req</th>
+                    <th>Alloc</th>
+                    <th>CIDR</th>
+                    <th>Net Address</th>
+                    <th>Usable Range</th>
+                  </tr>
+                </thead>
+                <tbody id="vlsmResultBody">
+                  <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Click Compute VLSM to partition subnets</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: IP Converter -->
+      <div id="tool-converter" class="tool-pane">
+        <div class="cyber-card" style="max-width: 650px;">
+          <div class="cyber-card-title">Multi-Base IP Address Converter</div>
+          <div style="margin-bottom: 1rem;">
+            <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Enter Decimal IP, Hex, 32-bit Integer, or Binary:</label>
+            <input type="text" id="converterInput" class="form-control" value="192.168.1.1" oninput="convertIpTool()">
+          </div>
+          <div class="result-box" id="converterResultBox">
+            <div class="result-row"><span class="text-muted">Dotted Decimal:</span><span class="text-bright">192.168.1.1</span></div>
+            <div class="result-row"><span class="text-muted">32-Bit Integer:</span><span class="text-cyan">3232235777</span></div>
+            <div class="result-row"><span class="text-muted">Hexadecimal:</span><span class="text-green">0xC0A80101</span></div>
+            <div class="result-row"><span class="text-muted">Dotted Binary:</span><span class="text-amber">11000000.10101000.00000001.00000001</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: Ping Diagnostics -->
+      <div id="tool-ping" class="tool-pane">
+        <div class="cyber-card" style="max-width: 700px;">
+          <div class="cyber-card-title">ICMP Ping Probe</div>
+          <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
+            <input type="text" id="pingHostInput" class="form-control" value="127.0.0.1" placeholder="Target host or IP">
+            <input type="number" id="pingCountInput" class="form-control" value="4" min="1" max="10" style="width: 90px;" placeholder="Count">
+            <button class="btn btn-primary" onclick="executePingTool()">Ping</button>
+          </div>
+          <pre id="pingResultBox" class="hex-dump-box" style="min-height: 120px; color: var(--text-bright);">Ready for ping diagnostics...</pre>
+        </div>
+      </div>
+
+      <!-- TAB 5: DNS Resolver -->
+      <div id="tool-dns" class="tool-pane">
+        <div class="cyber-card" style="max-width: 700px;">
+          <div class="cyber-card-title">DNS Record Resolution</div>
+          <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
+            <input type="text" id="dnsHostInput" class="form-control" value="localhost" placeholder="Hostname or IP">
+            <select id="dnsTypeSelect" class="form-control" style="width: 110px;">
+              <option value="A">A</option>
+              <option value="AAAA">AAAA</option>
+              <option value="ALL">ALL</option>
+            </select>
+            <button class="btn btn-primary" onclick="executeDnsTool()">Resolve</button>
+          </div>
+          <div class="result-box" id="dnsResultBox">
+            <div style="color: var(--text-muted); text-align: center;">Enter domain and query</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: Traceroute -->
+      <div id="tool-trace" class="tool-pane">
+        <div class="cyber-card" style="max-width: 750px;">
+          <div class="cyber-card-title">Hop-by-Hop Traceroute</div>
+          <div style="display: flex; gap: 8px; margin-bottom: 1rem;">
+            <input type="text" id="traceHostInput" class="form-control" value="127.0.0.1" placeholder="Target host">
+            <input type="number" id="traceHopsInput" class="form-control" value="10" min="1" max="20" style="width: 90px;" placeholder="Hops">
+            <button class="btn btn-primary" onclick="executeTraceTool()">Trace Route</button>
+          </div>
+          <pre id="traceResultBox" class="hex-dump-box" style="min-height: 140px; color: var(--text-bright);">Ready for traceroute...</pre>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ======================================================================
+         SECTION 6: LEARN & TOOLS HUB
+         ====================================================================== -->
+    <section id="section-learn" class="section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title"><span class="text-purple">🌐</span> Network Tools & Learning Hub</h2>
+          <div class="section-subtitle">Curated networking ecosystems and interactive OSI/TCP-IP layer dissection model</div>
+        </div>
+      </div>
+
+      <!-- Themed Tool Cards Grid -->
+      <div class="tools-hub-grid">
+        <div class="tool-hub-card">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--neon-cyan); margin-bottom: 4px;">TOPOLOGY & ROUTING LABS</div>
+            <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem;">NetSandbox</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+              <strong>What it's useful for:</strong> In-browser interactive topology labs for hands-on routing, VLAN segmentation, and subnetting experiments.
+            </p>
+            <p style="font-size: 0.8rem; color: var(--text-main);">
+              <strong>Relation to NetPulse:</strong> Complements NetPulse's live traffic analysis by allowing students to simulate complex virtual networks whose frames can be monitored here.
+            </p>
+          </div>
+          <a href="https://netsandbox.io" target="_blank" class="tool-hub-link">Explore NetSandbox ↗</a>
+        </div>
+
+        <div class="tool-hub-card">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--neon-green); margin-bottom: 4px;">GOLD STANDARD PACKET DISSECTION</div>
+            <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem;">Wireshark</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+              <strong>What it's useful for:</strong> Industry-standard deep packet analyzer supporting thousands of protocol dissectors and stream reassembly.
+            </p>
+            <p style="font-size: 0.8rem; color: var(--text-main);">
+              <strong>Relation to NetPulse:</strong> NetPulse provides a real-time web-accessible NOC dashboard and Wireshark-like inspector modal for quick triage, verified against Wireshark captures.
+            </p>
+          </div>
+          <a href="https://www.wireshark.org" target="_blank" class="tool-hub-link">Visit Wireshark.org ↗</a>
+        </div>
+
+        <div class="tool-hub-card">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--neon-amber); margin-bottom: 4px;">ENGINEERING CALCULATORS</div>
+            <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem;">NetTools Engineer</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+              <strong>What it's useful for:</strong> Professional IPv4/IPv6 subnet calculators, VLSM planners, and wildcard mask bitwise assistants.
+            </p>
+            <p style="font-size: 0.8rem; color: var(--text-main);">
+              <strong>Relation to NetPulse:</strong> Inspired Section 5's built-in Subnet and VLSM tools, allowing network planners to compute prefixes directly beside live telemetry.
+            </p>
+          </div>
+          <a href="https://nettools.engineer" target="_blank" class="tool-hub-link">Open NetTools Engineer ↗</a>
+        </div>
+
+        <div class="tool-hub-card">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--neon-cyan); margin-bottom: 4px;">DIAGNOSTICS & LOOKUPS</div>
+            <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem;">NetKitBox</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+              <strong>What it's useful for:</strong> Suite of web-based DNS, ping, traceroute, and open port diagnostic lookup services.
+            </p>
+            <p style="font-size: 0.8rem; color: var(--text-main);">
+              <strong>Relation to NetPulse:</strong> Serves as a reference for NetPulse's sanitized backend diagnostic endpoints for latency and route analysis.
+            </p>
+          </div>
+          <a href="https://netkitbox.com" target="_blank" class="tool-hub-link">Access NetKitBox ↗</a>
+        </div>
+
+        <div class="tool-hub-card">
+          <div>
+            <div style="font-size: 0.75rem; color: #4361ee; margin-bottom: 4px;">CISCO ACADEMY SIMULATOR</div>
+            <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem;">Cisco Packet Tracer</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+              <strong>What it's useful for:</strong> Visual network simulation software for configuring Cisco routers, switches, DHCP, and OSPF topologies.
+            </p>
+            <p style="font-size: 0.8rem; color: var(--text-main);">
+              <strong>Relation to NetPulse:</strong> NetPulse bridges theory from Packet Tracer simulations to live, real-world packet streams captured from real hardware.
+            </p>
+          </div>
+          <a href="https://www.netacad.com" target="_blank" class="tool-hub-link">Learn Packet Tracer ↗</a>
+        </div>
+
+        <div class="tool-hub-card">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--neon-purple); margin-bottom: 4px;">MULTITHREADED AUDITING</div>
+            <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem;">SharkTooth</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+              <strong>What it's useful for:</strong> Open-source, concurrent TCP/UDP port scanner designed for infrastructure auditing with Prometheus/Grafana exports.
+            </p>
+            <p style="font-size: 0.8rem; color: var(--text-main);">
+              <strong>Relation to NetPulse:</strong> Direct foundation for Section 4's Network Audit module and Prometheus telemetry metrics exporter.
+            </p>
+          </div>
+          <a href="https://github.com/znakar/SharkTooth" target="_blank" class="tool-hub-link">SharkTooth on GitHub ↗</a>
+        </div>
+      </div>
+
+      <!-- OSI / TCP-IP 5-Layer Dissection Explainer -->
+      <div class="cyber-card">
+        <div class="cyber-card-title">OSI & TCP/IP Protocol Stack Dissection Model</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          How NetPulse decomposes incoming frames across the standard 5-layer internet protocol stack:
+        </p>
+
+        <div class="layer-explainer-grid">
+          <div class="layer-card">
+            <div class="layer-header text-purple">Layer 2 // Data Link</div>
+            <div style="font-size: 0.8rem; color: var(--text-main);">
+              <strong>Header Fields:</strong> Source MAC, Destination MAC, EtherType (0x0800 IPv4, 0x0806 ARP, 0x86DD IPv6).<br>
+              <strong>NetPulse Dissection:</strong> Physical NIC frame framing and ARP cache resolution mappings.
+            </div>
+          </div>
+
+          <div class="layer-card">
+            <div class="layer-header text-cyan">Layer 3 // Network</div>
+            <div style="font-size: 0.8rem; color: var(--text-main);">
+              <strong>Header Fields:</strong> Source IP, Destination IP, TTL, IHL, Total Length, Protocol ID (6 TCP, 17 UDP, 1 ICMP).<br>
+              <strong>NetPulse Dissection:</strong> Host tracking, geolocation mapping, IP-level volume aggregation, ICMP echo floods.
+            </div>
+          </div>
+
+          <div class="layer-card">
+            <div class="layer-header text-green">Layer 4 // Transport</div>
+            <div style="font-size: 0.8rem; color: var(--text-main);">
+              <strong>Header Fields:</strong> Source Port, Destination Port, Seq/Ack numbers, TCP Flags (SYN, ACK, RST, FIN, PSH, URG), Window size.<br>
+              <strong>NetPulse Dissection:</strong> Service recognition, 3-way handshake analysis, SYN flood detection, port scan heuristics.
+            </div>
+          </div>
+
+          <div class="layer-card">
+            <div class="layer-header text-amber">Layer 7 // Application</div>
+            <div style="font-size: 0.8rem; color: var(--text-main);">
+              <strong>Header Fields:</strong> DNS Query/Answer records, HTTP Methods/Status, TLS handshake SNI.<br>
+              <strong>NetPulse Dissection:</strong> Protocol classification (DNS, HTTP, HTTPS), tunneling anomaly detection, payload inspection.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ======================================================================
+         SECTION 7: ARCHITECTURE & ABOUT
+         ====================================================================== -->
+    <section id="section-arch" class="section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title"><span class="text-cyan">⚙</span> Architecture & Engineering Pipeline</h2>
+          <div class="section-subtitle">System design, threading isolation, viva knowledge digest, and project credits</div>
+        </div>
+      </div>      <!-- Architecture View Switcher -->
+      <div class="arch-view-switcher">
+        <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">View Mode:</span>
+        <button class="arch-switch-btn active" id="btnArchVisual" onclick="switchArchMode('visual')">
+          <span>▣</span> Visual Pipeline Flowchart
+        </button>
+        <button class="arch-switch-btn" id="btnArchAscii" onclick="switchArchMode('ascii')">
+          <span>⌨</span> Terminal ASCII Diagram
+        </button>
+      </div>
+
+      <!-- VISUAL ARCHITECTURE PIPELINE (DEFAULT) -->
+      <div id="archVisualView" class="arch-pipeline-container">
+        <!-- Tier 1: Ingestion -->
+        <div class="arch-tier">
+          <div class="arch-tier-header">
+            <div class="arch-tier-title">
+              <span class="text-green">01 //</span> Multi-Vector Traffic Ingestion Layer
+            </div>
+            <span class="arch-tier-badge">Raw Ingestion</span>
+          </div>
+          <div class="arch-tier-cards">
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>Live Adapter Sniffer</span>
+                <span class="arch-node-tag">Npcap / libpcap</span>
+              </div>
+              <div class="arch-node-desc">
+                Executes promiscuous mode raw packet capture using Scapy at Layer 2. Leverages kernel-level Berkeley Packet Filters (BPF) to drop unneeded frames before user-space memory copying.
+              </div>
+            </div>
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>Synthetic Attack Generator</span>
+                <span class="arch-node-tag">Demo Mode</span>
+              </div>
+              <div class="arch-node-desc">
+                High-fidelity simulated multi-protocol generator (HTTPS, DNS, SSH, ARP, ICMP). Supports live attack injection (Port Scans, SYN floods, ICMP storms, DNS tunneling) for academic demonstration.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connector 1 -> 2 -->
+        <div class="arch-connector">
+          <div class="arch-connector-line">
+            <span class="arrow">▼</span> Non-Blocking Raw Frame Stream (Thread-Safe Handoff) <span class="arrow">▼</span>
+          </div>
+        </div>
+
+        <!-- Tier 2: Dissection & Buffers -->
+        <div class="arch-tier">
+          <div class="arch-tier-header">
+            <div class="arch-tier-title">
+              <span class="text-cyan">02 //</span> Packet Dissection & Bounded Ring Buffers
+            </div>
+            <span class="arch-tier-badge">L2-L7 Parsing</span>
+          </div>
+          <div class="arch-tier-cards">
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>Deep Protocol Dissector</span>
+                <span class="arch-node-tag">Scapy Decapsulator</span>
+              </div>
+              <div class="arch-node-desc">
+                Decapsulates headers layer-by-layer: Ethernet MACs, ARP caches, IPv4/IPv6 TTL, TCP 6-flag bitmask (SYN/ACK/FIN/RST), UDP length, ICMP types, DNS QNAMEs, and extracts raw payload hex/ASCII.
+              </div>
+            </div>
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>In-Memory Ring Buffers</span>
+                <span class="arch-node-tag">O(1) collections.deque</span>
+              </div>
+              <div class="arch-node-desc">
+                Maintains thread-safe circular deques protected by recursive locks (<code style="color: var(--neon-cyan);">threading.RLock</code>). Old frames are purged automatically in constant $O(1)$ time, eliminating memory leaks.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connector 2 -> 3 -->
+        <div class="arch-connector">
+          <div class="arch-connector-line">
+            <span class="arrow">▼</span> Decoupled Analytical Feeds to Dual Intelligence Engines <span class="arrow">▼</span>
+          </div>
+        </div>
+
+        <!-- Tier 3: Intelligence & Processing -->
+        <div class="arch-tier">
+          <div class="arch-tier-header">
+            <div class="arch-tier-title">
+              <span class="text-amber">03 //</span> Dual Intelligence & Analytics Processing
+            </div>
+            <span class="arch-tier-badge">1 Hz Sampling</span>
+          </div>
+          <div class="arch-tier-cards">
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>TrafficAnalyzer (Telemetry)</span>
+                <span class="arch-node-tag">Metrics Aggregator</span>
+              </div>
+              <div class="arch-node-desc">
+                Compiles 60-second sliding bandwidth history (KB/s & PPS), aggregates L2-L7 protocol distributions, ranks Top 10 talkers by volume, and tracks active bidirectional 5-tuple socket connections.
+              </div>
+            </div>
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>AnomalyEngine (Hybrid IDS)</span>
+                <span class="arch-node-tag">Z-Score & Heuristics</span>
+              </div>
+              <div class="arch-node-desc">
+                Calculates rolling Gaussian mean ($\mu$) and standard deviation ($\sigma$). Flags statistical anomalies ($|Z| > 3.0$). Evaluates deterministic signatures for port scans, SYN floods, and ICMP floods.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connector 3 -> 4 -->
+        <div class="arch-connector">
+          <div class="arch-connector-line">
+            <span class="arrow">▼</span> Multi-Channel Broadcast & Metric Persistence <span class="arrow">▼</span>
+          </div>
+        </div>
+
+        <!-- Tier 4: Persistence & Broadcast -->
+        <div class="arch-tier">
+          <div class="arch-tier-header">
+            <div class="arch-tier-title">
+              <span class="text-purple">04 //</span> Persistence, Metrics & Telemetry Broadcast
+            </div>
+            <span class="arch-tier-badge">Distribution</span>
+          </div>
+          <div class="arch-tier-cards">
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>SQLite Incident Database</span>
+                <span class="arch-node-tag">alerts.db</span>
+              </div>
+              <div class="arch-node-desc">
+                Persists structured security events with timestamp, severity, source IP, target IP, and anomaly scores. Exposes downloadable CSV audit report for incident forensics.
+              </div>
+            </div>
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>Prometheus Exporter</span>
+                <span class="arch-node-tag">/metrics</span>
+              </div>
+              <div class="arch-node-desc">
+                Standard Prometheus scrape endpoint exposing counters and gauges (<code style="color: var(--neon-cyan);">netpulse_packets_total</code>, <code style="color: var(--neon-cyan);">netpulse_alerts_total</code>) ready for Grafana dashboards.
+              </div>
+            </div>
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>Native WebSocket Server</span>
+                <span class="arch-node-tag">/ws/traffic</span>
+              </div>
+              <div class="arch-node-desc">
+                FastAPI asynchronous full-duplex WebSocket broadcasting a unified 1 Hz JSON telemetry snapshot directly to all connected browser sessions without HTTP polling overhead.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connector 4 -> 5 -->
+        <div class="arch-connector">
+          <div class="arch-connector-line">
+            <span class="arrow">▼</span> Sub-Second Client-Side Rendering (Zero Build Step) <span class="arrow">▼</span>
+          </div>
+        </div>
+
+        <!-- Tier 5: Presentation UI -->
+        <div class="arch-tier">
+          <div class="arch-tier-header">
+            <div class="arch-tier-title">
+              <span class="text-green">05 //</span> Presentation Layer (Dark NOC Cyber Terminal)
+            </div>
+            <span class="arch-tier-badge">Vanilla Frontend</span>
+          </div>
+          <div class="arch-tier-cards">
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>Interactive Visualizations</span>
+                <span class="arch-node-tag">Chart.js 4.4</span>
+              </div>
+              <div class="arch-node-desc">
+                Dynamic 60s bandwidth timeline, protocol doughnut chart, and horizontal top talkers bar charts styled with glowing cyber dark NOC themes.
+              </div>
+            </div>
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>Network Topology Hero</span>
+                <span class="arch-node-tag">HTML5 &lt;canvas&gt;</span>
+              </div>
+              <div class="arch-node-desc">
+                Real-time particle simulation showing network nodes (gateway, cloud, servers, hosts, rogue nodes) with packets pulsating along links.
+              </div>
+            </div>
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>Mini-Wireshark Modal</span>
+                <span class="arch-node-tag">Packet Dissector</span>
+              </div>
+              <div class="arch-node-desc">
+                Clickable packet inspection modal showing layered protocol trees (Ethernet, IPv4, TCP/UDP/ICMP, DNS) and raw payload hex/ASCII dumps.
+              </div>
+            </div>
+            <div class="arch-node-card">
+              <div class="arch-node-title">
+                <span>Network Audit & Toolkit</span>
+                <span class="arch-node-tag">SharkTooth Module</span>
+              </div>
+              <div class="arch-node-desc">
+                Integrated RFC1918 safe multithreaded port scanner, IPv4 subnet calculator, VLSM planner, and ping/DNS diagnostics.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TERMINAL ASCII ARCHITECTURE (TOGGLEABLE) -->
+      <pre id="archAsciiView" class="arch-ascii-box" style="display: none;">
++----------------------------------------------------------------------------------------------------+
+|                                    NETPULSE SYSTEM ARCHITECTURE                                    |
++----------------------------------------------------------------------------------------------------+
+                                                  │
+                 ┌────────────────────────────────┴────────────────────────────────┐
+                 │                                                                 │
+                 ▼                                                                 ▼
+    [ Live Network Adapter ]                                          [ Synthetic Generator ]
+    (Npcap / Promiscuous Sniff)                                      (Multi-protocol & Attacks)
+                 │                                                                 │
+                 └────────────────────────────────┬────────────────────────────────┘
+                                                  │
+                                                  ▼
+                                     [ Thread-Safe Ring Buffer ]
+                                     (collections.deque O(1))
+                                                  │
+                         ┌────────────────────────┴────────────────────────┐
+                         │                                                 │
+                         ▼                                                 ▼
+             [ TrafficAnalyzer (1 Hz) ]                         [ AnomalyEngine (IDS) ]
+             • 60s Bandwidth Sliding Window                     • Rolling Z-Score Baseline
+             • Protocol Counters (TCP/UDP/DNS)                  • Port Scan & SYN Flood Rules
+             • Top Talkers & Port Aggregation                   • SQLite DB (alerts.db)
+                         │                                                 │
+                         └────────────────────────┬────────────────────────┘
+                                                  │
+                                                  ▼
+                                    [ WebSocket Server (/ws/traffic) ]
+                                    (FastAPI async broadcast at 1 Hz)
+                                                  │
+                                                  ▼
+                                   [ Cyber Terminal Single-Page App ]
+                                   (Chart.js + Mini-Wireshark + Canvas)
++----------------------------------------------------------------------------------------------------+
+      </pre>
+
+      <!-- Key Engineering Pillars -->
+      <div class="arch-pillar-grid">
+        <div class="arch-pillar-card">
+          <div class="arch-pillar-icon text-green">⚡</div>
+          <div class="arch-pillar-title">Thread Isolation & Zero Packet Drops</div>
+          <div class="arch-pillar-desc">
+            The Scapy packet capture worker executes in an isolated background thread completely decoupled from the asynchronous WebSocket event loop. Heavy UI rendering or client reconnects cannot stall packet ingestion.
+          </div>
+        </div>
+
+        <div class="arch-pillar-card">
+          <div class="arch-pillar-icon text-cyan">🔒</div>
+          <div class="arch-pillar-title">O(1) Bounded Memory Architecture</div>
+          <div class="arch-pillar-desc">
+            All sliding windows use Python's <code style="color: var(--neon-cyan);">collections.deque(maxlen=N)</code>. Appending new packets discards the oldest item in constant $O(1)$ time, guaranteeing zero memory bloat during 24/7 continuous operations.
+          </div>
+        </div>
+
+        <div class="arch-pillar-card">
+          <div class="arch-pillar-icon text-amber">🛡</div>
+          <div class="arch-pillar-title">Hybrid Anomaly Detection Model</div>
+          <div class="arch-pillar-desc">
+            Blends statistical standard score modeling ($Z = \frac{X - \mu}{\sigma} > 3.0$) with deterministic rule-based signatures for SYN floods, port scans, and ICMP floods to achieve high precision with near-zero false alarms.
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <!-- Technical Specifications Table -->
+        <div class="cyber-card">
+          <div class="cyber-card-title">Technology Stack Specifications</div>
+          <table class="tech-stack-table">
+            <thead>
+              <tr><th>Component</th><th>Technology</th><th>Role & Responsibility</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Backend Engine</td><td>Python 3.10+, FastAPI</td><td>Asynchronous API, routing, Lifespan controller</td></tr>
+              <tr><td>Packet Sniffing</td><td>Scapy (libpcap / Npcap)</td><td>Raw socket capture, BPF filtering, layer dissection</td></tr>
+              <tr><td>Real-Time Streaming</td><td>WebSockets (Native)</td><td>1 Hz full telemetry push snapshot</td></tr>
+              <tr><td>Data Structures</td><td>collections.deque</td><td>Thread-safe O(1) sliding window buffers</td></tr>
+              <tr><td>Alert Storage</td><td>SQLite3</td><td>Persistent security incident logs & CSV export</td></tr>
+              <tr><td>Frontend UI</td><td>Vanilla HTML5, CSS3, JS</td><td>No build step, Dark NOC cyber terminal theme</td></tr>
+              <tr><td>Telemetry Visuals</td><td>Chart.js 4.4</td><td>Smooth dark-themed animated line, bar, doughnut charts</td></tr>
+              <tr><td>Metrics Export</td><td>Prometheus Client</td><td>Exposes /metrics endpoint for Grafana monitoring</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Future Scope -->
+        <div class="cyber-card">
+          <div class="cyber-card-title">Future Research & Scope</div>
+          <div style="font-size: 0.85rem; line-height: 1.8;">
+            <div style="margin-bottom: 0.75rem;">
+              <strong class="text-green">1. Machine Learning Anomaly Detection:</strong>
+              <div style="color: var(--text-muted);">Integrate Isolation Forests and Autoencoders trained on normal traffic embeddings to detect novel zero-day threats.</div>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+              <strong class="text-cyan">2. Automated Threat Mitigation (IPS):</strong>
+              <div style="color: var(--text-muted);">Dynamically write iptables or Windows Defender firewall drop rules upon detecting confirmed attacks.</div>
+            </div>
+            <div style="margin-bottom: 0.75rem;">
+              <strong class="text-amber">3. Instant Incident Webhooks:</strong>
+              <div style="color: var(--text-muted);">Direct integration with Discord, Telegram, and PagerDuty for real-time security alerts.</div>
+            </div>
+            <div>
+              <strong class="text-purple">4. Distributed Agent Architecture:</strong>
+              <div style="color: var(--text-muted);">Deploy lightweight capture probes across multiple branch subnets reporting to a central NetPulse controller.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Viva Voce Quick Digest & Student Info Placeholder -->
+      <div class="cyber-card">
+        <div class="cyber-card-title">Computer Networks Project & Student Details</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; font-size: 0.85rem;">
+          <div>
+            <div class="result-row"><span class="text-muted">Project Name:</span><span class="text-bright">NetPulse: Real-Time Network Traffic Analysis System</span></div>
+            <div class="result-row"><span class="text-muted">Subject Domain:</span><span class="text-cyan">Computer Networks / Network Security / Telemetry</span></div>
+            <div class="result-row"><span class="text-muted">Academic Year:</span><span class="text-green">2026 - 2027</span></div>
+            <div class="result-row"><span class="text-muted">Implementation:</span><span class="text-bright">FastAPI + Scapy + WebSockets + Dark NOC UI</span></div>
+          </div>
+          <div>
+            <div class="result-row"><span class="text-muted">Student Name:</span><span class="text-bright">Computer Networks Project Team</span></div>
+            <div class="result-row"><span class="text-muted">Roll / ID Number:</span><span class="text-cyan">CN-FINAL-2026</span></div>
+            <div class="result-row"><span class="text-muted">Supervisor / Faculty:</span><span class="text-bright">Department of Computer Science & Engineering</span></div>
+            <div class="result-row"><span class="text-muted">Repository:</span><span class="text-green">c:\ComputerNetworksfinal</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /container -->
+
+  <!-- ======================================================================
+       PACKET INSPECTOR MODAL (MINI-WIRESHARK)
+       ====================================================================== -->
+  <div class="modal-backdrop" id="packetDetailModal" onclick="if(event.target===this)closePacketModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="text-green" style="font-weight: 700;">FRAME INSPECTION //</span>
+          <span id="modalPacketTitle" style="color: #fff; font-weight: 700;">Packet #1 Details</span>
+        </div>
+        <button class="modal-close-btn" onclick="closePacketModal()" title="Close Inspector">&times;</button>
+      </div>
+
+      <div class="modal-body" id="modalPacketBody">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
